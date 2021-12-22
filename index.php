@@ -1,38 +1,43 @@
 <?php
 
-class Singleton {
-    private static $singleton;
-    private $text = "aaaaaaaa";
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
-    private function __construct()
-    {
-        echo "generated instance\n";
-    }
-    
-    public function setText($tex) {
-        $this -> text = $tex;
-    }
-    
-    public function getText() {
-        return $this -> text;
-    }
+require "vendor/autoload.php";
 
-    public static function getInstance() {
-        if(!isset(self::$singleton)) {
-            self::$singleton = new Singleton;
-        }
+$key = "secret_key";
+$payload = [
+    "iss" => "http://localhost/phpprac",
+    "aud" => "http://localhost/phpprac",
+    "iat" => 1356999524,
+    "nbf" => 1357000000,
+];
 
-        return self::$singleton;
-    }
+// tokenの生成
+// encode関数の中でヘッダーは設定されているから変更不可
+$jwt = JWT::encode($payload, $key, "HS256");
+// 
+$decoded = JWT::decode($jwt, new key($key, "HS256"));
 
-    public function sayHello() {
-        echo "hello\n";
-    }
-}
+echo $jwt."\n";
+print_r($decoded);
 
-Singleton::getInstance() -> sayHello();
-echo Singleton::getInstance() -> getText() . "\n";
-Singleton::getInstance() -> setText("myName is tyatya");
-echo Singleton::getInstance() -> getText() . "\n";
+$decoded_array = (array) $decoded;
 
-?>
+JWT::$leeway = 60;
+$decoded = JWT::decode($jwt, new Key($key, "HS256"));
+
+// $jwt = preg_split("/\s+/", $_SERVER["HTTP_AYTHORIZATION"][0]);
+
+// try {
+//     $decoded = JWT::decode($jwt, $key, ["HS256"]);
+//     $status = 200;
+//     $msg = "ok";
+// } catch (Exception $e) {
+//     $status = 401;
+//     $msg = $e -> getMessage();
+// }
+
+// header("Content-Type: application/json");
+// http_response_code($status);
+// echo json_encode(["msg" => $msg]);
